@@ -2,7 +2,6 @@ import "module:spotube_plugin" as spotube
 import "module:std" as std
 
 var LocalStorage = spotube.LocalStorage
-var Webview = spotube.Webview
 var StreamController = std.StreamController
 var Stream = std.Stream
 var StreamSubscription = std.StreamSubscription
@@ -33,36 +32,33 @@ class AuthEndpoint {
   }
 
   fun authenticate() -> Future {
-    var webview = Webview(uri: "https://github.com/sayborduu/spotube-youtube-audio")
-    return webview.open().then((_) {
-      return spotube.SpotubeForm.show(
-        "RapidAPI Authentication",
-        [
-          {
-            objectType: "text",
-            text: "Enter your RapidAPI key to enable MP3 downloads via the youtube-mp3-download API."
-          }.toJson(),
-          {
-            objectType: "input",
-            id: "rapidapi_key",
-            variant: "password",
-            placeholder: "x-rapidapi-key",
-            required: true
-          }.toJson()
-        ]
-      ).then((result) {
-        if (result != null && result.isNotEmpty) {
-          var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
-          if (keyField != null) {
-            var key = keyField["value"]
-            if (key != null && key.isNotEmpty) {
-              LocalStorage.setString("youtube_audio_source.rapidapi_key", key)
-              _isAuthenticated = true
-              controller.add({ type: "login" }.toJson())
-            }
+    return spotube.SpotubeForm.show(
+      "RapidAPI Authentication",
+      [
+        {
+          objectType: "text",
+          text: "Enter your RapidAPI key to enable MP3 downloads via the youtube-mp3-download API."
+        }.toJson(),
+        {
+          objectType: "input",
+          id: "rapidapi_key",
+          variant: "password",
+          placeholder: "x-rapidapi-key",
+          required: true
+        }.toJson()
+      ]
+    ).then((result) {
+      if (result != null && result.isNotEmpty) {
+        var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
+        if (keyField != null) {
+          var key = keyField["value"]
+          if (key != null && key.isNotEmpty) {
+            LocalStorage.setString("youtube_audio_source.rapidapi_key", key)
+            _isAuthenticated = true
+            controller.add({ type: "login" }.toJson())
           }
         }
-      })
+      }
     })
   }
 

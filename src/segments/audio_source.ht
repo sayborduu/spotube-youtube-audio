@@ -64,11 +64,17 @@ class AudioSourceEndpoint {
       }
       return yt.streamManifest(videoId).then((manifest) {
         return manifest.map((stream) {
+          var url = stream["url"]
+          if (url is string && url.startsWith("http://0.0.0.0:")) {
+            url = url.replaceFirst("0.0.0.0", "127.0.0.1")
+          }
+          var container = stream["container"]
+          var codec = container == "webm" ? "opus" : "aac"
           return {
-            "url": stream["url"],
-            "container": stream["container"],
-            "type": "lossless",
-            "codec": "aac",
+            "url": url,
+            "container": container,
+            "type": "lossy",
+            "codec": codec,
             "bitrate": stream["bitrate"],
           }.toJson()
         }).toList()
