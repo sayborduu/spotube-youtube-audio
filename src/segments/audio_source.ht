@@ -35,8 +35,6 @@ class AudioSourceEndpoint {
 
   get supportedPresets -> List {
     return [
-      { type: "lossy", name: "mp4", qualities: [ { bitrate: 256000 }, { bitrate: 128000 }, { bitrate: 96000 }, { bitrate: 44000 } ] }.toJson(),
-      { type: "lossy", name: "webm", qualities: [ { bitrate: 256000 }, { bitrate: 128000 }, { bitrate: 96000 }, { bitrate: 44000 } ] }.toJson(),
       { type: "lossy", name: "mp3", qualities: [ { bitrate: 128000 } ] }.toJson(),
     ]
   }
@@ -59,32 +57,7 @@ class AudioSourceEndpoint {
   fun streams(match: Map) -> List {
     var videoId = match["id"]
     return _externalApi.fetchStreams(_api, videoId).then((apiStreams) {
-      if (apiStreams.isNotEmpty) {
-        return apiStreams
-      }
-      return yt.streamManifest(videoId).then((manifest) {
-        if (manifest == null || manifest.isEmpty) {
-          return []
-        }
-        return manifest.map((stream) {
-          var url = stream["url"]
-          var container = stream["container"]
-          if (url == null || url.isEmpty || container == null || container.isEmpty) {
-            return null
-          }
-          if (url.startsWith("http://0.0.0.0:")) {
-            return null
-          }
-          var codec = container == "webm" ? "opus" : "aac"
-          return {
-            "url": url,
-            "container": container,
-            "type": "lossy",
-            "codec": codec,
-            "bitrate": stream["bitrate"],
-          }.toJson()
-        }).where((s) => s != null).toList()
-      })
+      return apiStreams
     })
   }
 }

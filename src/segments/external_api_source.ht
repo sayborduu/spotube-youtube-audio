@@ -43,7 +43,7 @@ class ExternalApiSource {
         ]
       }
       return []
-    }).catchError((err) {
+    }, (err) {
       return []
     })
   }
