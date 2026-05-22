@@ -1,16 +1,19 @@
+
 import "module:std" as std
+import "module:spotube_plugin" as spotube_plugin
 
 import { AudioSourceEndpoint } from './segments/audio_source.ht'
 import { CorePlugin } from './segments/core.ht'
 
 var HttpClient = std.HttpClient
 var HttpBaseOptions = std.HttpBaseOptions
+var LocalStorage = spotube_plugin.LocalStorage
 
 class YouTubeAudioSourcePlugin {
   var audioSource: AudioSourceEndpoint
   var core: CorePlugin
-
   var api: HttpClient
+  var storage: LocalStorage
   
   construct (){
     api = HttpClient(
@@ -18,10 +21,11 @@ class YouTubeAudioSourcePlugin {
         baseUrl: "https://example.com"
       )
     )
+    storage = LocalStorage()
     
-    audioSource = AudioSourceEndpoint()
+    audioSource = AudioSourceEndpoint(api, storage)
     core = CorePlugin(api)
   }
 }
 
-export { TemplateMetadataProviderPlugin }
+export { YouTubeAudioSourcePlugin }

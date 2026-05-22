@@ -1,7 +1,11 @@
 import "module:spotube_plugin" as spotube_plugin
 import "module:std" as std
+import { ExternalApiSource } from './external_api_source.ht'
 
 var YouTubeEngine = spotube_plugin.YouTubeEngine
+var LocalStorage = spotube_plugin.LocalStorage
+var HttpClient = std.HttpClient
+var RequestOptions = std.RequestOptions
 
 class Converter {
   static fun toSpotubeMatchObject(res: List) -> List<Map> {
@@ -21,15 +25,20 @@ class Converter {
 
 class AudioSourceEndpoint {
   var yt: YouTubeEngine
-  construct () {
+  var _externalApi: ExternalApiSource
+  var _api: HttpClient
+
+  construct (api: HttpClient, storage: LocalStorage) {
     yt = YouTubeEngine()
+    _api = api
+    _externalApi = ExternalApiSource(storage)
   }
 
-  // List of containers and their supported qualities
   get supportedPresets -> List {
     return [
-      { type: "lossy", name: "mp4", qualities: [ { bitrate: 256000 }, { bitrate: 128000 }, { bitrate: 96000 }, { bitrate: 44000 } ] }.toJson(),      
+      { type: "lossy", name: "mp4", qualities: [ { bitrate: 256000 }, { bitrate: 128000 }, { bitrate: 96000 }, { bitrate: 44000 } ] }.toJson(),
       { type: "lossy", name: "webm", qualities: [ { bitrate: 256000 }, { bitrate: 128000 }, { bitrate: 96000 }, { bitrate: 44000 } ] }.toJson(),
+      { type: "lossy", name: "mp3", qualities: [ { bitrate: 128000 } ] }.toJson(),
     ]
   }
   
@@ -38,6 +47,15 @@ class AudioSourceEndpoint {
   /// @param track - Map<SpotubeTrackObject>
   /// @returns Future<List<SpotubeAudioSourceMatchObject>>
   fun matches(track: Map) -> List {
+    if (_externalApi.shouldShowConfig) {
+      return _externalApi.showConfigForm().then((_) {
+        return _doMatches(track)
+      })
+    }
+    return _doMatches(track)
+  }
+
+  fun _doMatches(track: Map) -> Future<List> {
     final artists = track["artists"].map((a)=> a["name"]).join(", ")
     final hasISRC = track["isrc"] != null && track["isrc"].isNotEmpty;
     return yt.search(
@@ -57,16 +75,22 @@ class AudioSourceEndpoint {
   /// @param match - Map<SpotubeAudioSourceStreamObject>
   /// @returns Future<List<SpotubeAudioSourceStreamObject>>
   fun streams(match: Map) -> List {
-    return yt.streamManifest(match["id"]).then((manifest){
-      return manifest.map((stream){
-        return {
-          "url": stream["url"],
-          "container": stream["container"],
-          "type": "lossless",
-          "codec": "aac",
-          "bitrate": stream["bitrate"],
-        }.toJson()
-      }).toList()
+    var videoId = match["id"]
+    return _externalApi.fetchStreams(_api, videoId).then((apiStreams) {
+      if (apiStreams.isNotEmpty) {
+        return apiStreams
+      }
+      return yt.streamManifest(videoId).then((manifest) {
+        return manifest.map((stream) {
+          return {
+            "url": stream["url"],
+            "container": stream["container"],
+            "type": "lossless",
+            "codec": "aac",
+            "bitrate": stream["bitrate"],
+          }.toJson()
+        }).toList()
+      })
     })
   }
 }

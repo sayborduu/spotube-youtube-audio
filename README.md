@@ -1,1 +1,1 @@
-## Spotube Metadata Plugin Template
+## Spotube YouTube Audio Improved
