@@ -5,7 +5,6 @@ import { ExternalApiSource } from './external_api_source.ht'
 var YouTubeEngine = spotube_plugin.YouTubeEngine
 var LocalStorage = spotube_plugin.LocalStorage
 var HttpClient = std.HttpClient
-var RequestOptions = std.RequestOptions
 
 class Converter {
   static fun toSpotubeMatchObject(res: List) -> List<Map> {
@@ -41,21 +40,8 @@ class AudioSourceEndpoint {
       { type: "lossy", name: "mp3", qualities: [ { bitrate: 128000 } ] }.toJson(),
     ]
   }
-  
-  /// Find matching audio sources for a given track. It can return one or multiple matches.
-  /// The first match is considered the best match.
-  /// @param track - Map<SpotubeTrackObject>
-  /// @returns Future<List<SpotubeAudioSourceMatchObject>>
-  fun matches(track: Map) -> List {
-    if (_externalApi.shouldShowConfig) {
-      return _externalApi.showConfigForm().then((_) {
-        return _doMatches(track)
-      })
-    }
-    return _doMatches(track)
-  }
 
-  fun _doMatches(track: Map) -> Future<List> {
+  fun matches(track: Map) -> List {
     final artists = track["artists"].map((a)=> a["name"]).join(", ")
     final hasISRC = track["isrc"] != null && track["isrc"].isNotEmpty;
     return yt.search(
@@ -70,10 +56,6 @@ class AudioSourceEndpoint {
     })
   }
 
-  /// For the given match, return all available streams.
-  /// Each stream represents a unique combination of container and quality.
-  /// @param match - Map<SpotubeAudioSourceStreamObject>
-  /// @returns Future<List<SpotubeAudioSourceStreamObject>>
   fun streams(match: Map) -> List {
     var videoId = match["id"]
     return _externalApi.fetchStreams(_api, videoId).then((apiStreams) {

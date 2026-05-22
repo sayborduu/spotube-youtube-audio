@@ -1,0 +1,74 @@
+import "module:spotube_plugin" as spotube_plugin
+import "module:std" as std
+
+var LocalStorage = spotube_plugin.LocalStorage
+var SpotubeForm = spotube_plugin.SpotubeForm
+var StreamController = std.StreamController
+
+class AuthEndpoint {
+  var _storage: LocalStorage
+  var _isAuthenticated: bool
+  final controller: StreamController
+
+  get authStateStream -> Stream => controller.stream
+
+  construct(storage: LocalStorage) {
+    _storage = storage
+    _isAuthenticated = false
+    controller = StreamController.broadcast()
+    _restore()
+  }
+
+  fun _restore() {
+    _storage.getString("youtube_audio_source.rapidapi_key").then((key) {
+      if (key != null && key.isNotEmpty) {
+        _isAuthenticated = true
+        controller.add({ type: "recovered" }.toJson())
+      }
+    })
+  }
+
+  fun isAuthenticated() -> bool {
+    return _isAuthenticated
+  }
+
+  fun authenticate() -> Future {
+    return SpotubeForm.show(
+      "RapidAPI Authentication",
+      [
+        {
+          objectType: "text",
+          text: "Enter your RapidAPI key to enable MP3 downloads via the youtube-mp3-download API."
+        }.toJson(),
+        {
+          objectType: "input",
+          id: "rapidapi_key",
+          variant: "password",
+          placeholder: "x-rapidapi-key",
+          required: true
+        }.toJson()
+      ]
+    ).then((result) {
+      if (result != null && result.isNotEmpty) {
+        var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
+        if (keyField != null) {
+          var key = keyField["value"]
+          if (key != null && key.isNotEmpty) {
+            _storage.setString("youtube_audio_source.rapidapi_key", key)
+            _isAuthenticated = true
+            controller.add({ type: "login" }.toJson())
+          }
+        }
+      }
+    })
+  }
+
+  fun logout() -> Future {
+    return _storage.remove("youtube_audio_source.rapidapi_key").then((_) {
+      _isAuthenticated = false
+      controller.add({ type: "logout" }.toJson())
+    })
+  }
+}
+
+export { AuthEndpoint }

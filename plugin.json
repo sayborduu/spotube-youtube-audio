@@ -5,7 +5,7 @@
   "description": "YouTube audio source plugin for Spotube",
   "entryPoint": "YouTubeAudioSourcePlugin",
   "apis": ["localstorage"],
-  "abilities": ["audio-source"],
+  "abilities": ["audio-source", "authentication"],
   "repository": "https://github.com/sayborduu/spotube-youtube-audio",
   "pluginApiVersion": "2.0.0"
 }

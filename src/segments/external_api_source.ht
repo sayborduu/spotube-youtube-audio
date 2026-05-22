@@ -2,7 +2,6 @@ import "module:spotube_plugin" as spotube_plugin
 import "module:std" as std
 
 var LocalStorage = spotube_plugin.LocalStorage
-var SpotubeForm = spotube_plugin.SpotubeForm
 var HttpClient = std.HttpClient
 var RequestOptions = std.RequestOptions
 
@@ -13,61 +12,16 @@ class ExternalApiSource {
     _storage = storage
   }
 
-  fun showConfigForm() -> Future {
-    return SpotubeForm.show(
-      "Configure External API",
-      [
-        {
-          objectType: "text",
-          text: "Enter your RapidAPI key to enable MP3 downloads via the youtube-mp3-download API."
-        }.toJson(),
-        {
-          objectType: "input",
-          id: "rapidapi_key",
-          variant: "password",
-          placeholder: "Enter your x-rapidapi-key",
-          required: true
-        }.toJson(),
-        {
-          objectType: "text",
-          text: "Get a free key at "
-        }.toJson()
-      ]
-    ).then((result) {
-      if (result != null && result.isNotEmpty) {
-        var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
-        if (keyField != null) {
-          var key = keyField["value"]
-          if (key != null && key.isNotEmpty) {
-            _saveConfig(key)
-            return true
-          }
-        }
+  fun fetchStreams(api: HttpClient, videoId: string) -> Future {
+    return _storage.getString("youtube_audio_source.rapidapi_key").then((key) {
+      if (key == null || key.isEmpty) {
+        return []
       }
-      _storage.setString("youtube_audio_source.skip_config", "true")
-      return false
+      return _fetchFromApi(api, videoId, key)
     })
   }
 
-  fun _saveConfig(apiKey: string) {
-    _storage.setString("youtube_audio_source.rapidapi_key", apiKey)
-    _storage.remove("youtube_audio_source.skip_config")
-  }
-
-  get isConfigured -> bool {
-    return _storage.getString("youtube_audio_source.rapidapi_key") != null
-  }
-
-  get shouldShowConfig -> bool {
-    return !isConfigured &&
-      _storage.getString("youtube_audio_source.skip_config") != "true"
-  }
-
-  fun fetchStreams(api: HttpClient, videoId: string) -> Future {
-    var key = _storage.getString("youtube_audio_source.rapidapi_key")
-    if (key == null || key.isEmpty) {
-      return Future.value([])
-    }
+  fun _fetchFromApi(api: HttpClient, videoId: string, key: string) -> Future {
     var url = "https://youtube-mp36.p.rapidapi.com/dl?id=${videoId}"
     return api.get_req(
       url,
