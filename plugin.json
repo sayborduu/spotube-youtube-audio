@@ -1,11 +1,11 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.6.1",
   "name": "YouTube Audio Improved",
   "author": "Alex Badi, original plugin by: Kingkor Roy Tirtho",
   "description": "YouTube audio source plugin for Spotube",
   "entryPoint": "YouTubeAudioSourcePlugin",
   "apis": ["webview", "localstorage"],
-  "abilities": ["audio-sour                   ce", "authentication"],
+  "abilities": ["audio-source", "authentication"],
   "repository": "https://github.com/sayborduu/spotube-youtube-audio",
   "pluginApiVersion": "2.0.0"
 }
