@@ -25,7 +25,7 @@ class CorePlugin {
     var patch = int.parse(versionParts[2])
 
     return client.get_req(
-      "https://api.github.com/repos/KRTirtho/spotube-plugin-youtube-audio/releases/latest",
+      "https://api.github.com/repos/sayborduu/spotube-youtube-audio/releases/latest",
       options: RequestOptions(
         headers: {
           "Accept": "application/vnd.github.v3+json"

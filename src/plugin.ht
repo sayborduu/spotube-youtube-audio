@@ -14,7 +14,6 @@ class YouTubeAudioSourcePlugin {
   var auth: AuthEndpoint
   var core: CorePlugin
   var api: HttpClient
-  var storage: LocalStorage
 
   construct (){
     api = HttpClient(
@@ -22,11 +21,14 @@ class YouTubeAudioSourcePlugin {
         baseUrl: "https://example.com"
       )
     )
-    storage = LocalStorage()
 
-    audioSource = AudioSourceEndpoint(api, storage)
-    auth = AuthEndpoint(storage)
+    audioSource = AudioSourceEndpoint(api, LocalStorage())
+    auth = AuthEndpoint()
     core = CorePlugin(api)
+
+    auth.authStateStream.listen((event) {
+      // Auth state changed
+    })
   }
 }
 
