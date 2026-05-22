@@ -33,16 +33,8 @@ class AuthEndpoint {
   }
 
   fun authenticate() -> Future {
-    var webview = Webview(
-      uri: "https://github.com/sayborduu/spotube-youtube-audio"
-    )
-
-    var sub: StreamSubscription = webview.onUrlRequestStream.listen((url) {
-      print("WebView navigated to: $url")
-    })
-
+    var webview = Webview(uri: "https://github.com/sayborduu/spotube-youtube-audio")
     return webview.open().then((_) {
-      sub.cancel()
       return spotube.SpotubeForm.show(
         "RapidAPI Authentication",
         [
