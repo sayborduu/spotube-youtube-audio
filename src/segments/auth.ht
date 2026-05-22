@@ -50,7 +50,13 @@ class AuthEndpoint {
     ).then((result) {
       var key = null
       if (result != null && result.isNotEmpty) {
-        var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
+        var keyField = null
+        for (var f in result) {
+          if (f["id"] == "rapidapi_key") {
+            keyField = f
+            break
+          }
+        }
         if (keyField != null && keyField["value"] != null && keyField["value"].isNotEmpty) {
           key = keyField["value"]
         }

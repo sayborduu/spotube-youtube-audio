@@ -63,12 +63,18 @@ class AudioSourceEndpoint {
         return apiStreams
       }
       return yt.streamManifest(videoId).then((manifest) {
+        if (manifest == null || manifest.isEmpty) {
+          return []
+        }
         return manifest.map((stream) {
           var url = stream["url"]
-          if (url.startsWith("http://0.0.0.0:")) {
-            url = url.replaceFirst("0.0.0.0", "127.0.0.1")
-          }
           var container = stream["container"]
+          if (url == null || url.isEmpty || container == null || container.isEmpty) {
+            return null
+          }
+          if (url.startsWith("http://0.0.0.0:")) {
+            return null
+          }
           var codec = container == "webm" ? "opus" : "aac"
           return {
             "url": url,
@@ -77,7 +83,7 @@ class AudioSourceEndpoint {
             "codec": codec,
             "bitrate": stream["bitrate"],
           }.toJson()
-        }).toList()
+        }).where((s) => s != null).toList()
       })
     })
   }
