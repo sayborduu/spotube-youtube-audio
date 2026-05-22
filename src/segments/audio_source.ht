@@ -35,7 +35,16 @@ class AudioSourceEndpoint {
 
   get supportedPresets -> List {
     return [
-      { type: "lossy", name: "mp3", qualities: [ { bitrate: 128000 } ] }.toJson(),
+      {
+        type: "lossy",
+        name: "mp3",
+        qualities: [
+          { bitrate: 64000 },
+          { bitrate: 128000 },
+          { bitrate: 192000 },
+          { bitrate: 320000 }
+        ]
+      }.toJson(),
     ]
   }
 
