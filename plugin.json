@@ -4,7 +4,7 @@
   "author": "Alex Badi, original plugin by: Kingkor Roy Tirtho",
   "description": "YouTube audio source plugin for Spotube",
   "entryPoint": "YouTubeAudioSourcePlugin",
-  "apis": ["localstorage", "forms"],
+  "apis": ["localstorage"],
   "abilities": ["audio-source"],
   "repository": "https://github.com/sayborduu/spotube-youtube-audio",
   "pluginApiVersion": "2.0.0"
