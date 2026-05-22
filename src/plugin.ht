@@ -8,6 +8,7 @@ import { CorePlugin } from './segments/core.ht'
 var HttpClient = std.HttpClient
 var HttpBaseOptions = std.HttpBaseOptions
 var LocalStorage = spotube_plugin.LocalStorage
+var Stream = std.Stream
 
 class YouTubeAudioSourcePlugin {
   var audioSource: AudioSourceEndpoint
