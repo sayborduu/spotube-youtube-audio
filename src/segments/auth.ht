@@ -48,16 +48,18 @@ class AuthEndpoint {
         }.toJson()
       ]
     ).then((result) {
+      var key = null
       if (result != null && result.isNotEmpty) {
         var keyField = result.firstWhere((f) => f["id"] == "rapidapi_key", orElse: () => null)
-        if (keyField != null) {
-          var key = keyField["value"]
-          if (key != null && key.isNotEmpty) {
-            LocalStorage.setString("youtube_audio_source.rapidapi_key", key)
-            _isAuthenticated = true
-            controller.add({ type: "login" }.toJson())
-          }
+        if (keyField != null && keyField["value"] != null && keyField["value"].isNotEmpty) {
+          key = keyField["value"]
         }
+      }
+      if (key != null) {
+        return LocalStorage.setString("youtube_audio_source.rapidapi_key", key).then((_) {
+          _isAuthenticated = true
+          controller.add({ type: "login" }.toJson())
+        })
       }
     })
   }

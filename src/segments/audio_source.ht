@@ -65,7 +65,7 @@ class AudioSourceEndpoint {
       return yt.streamManifest(videoId).then((manifest) {
         return manifest.map((stream) {
           var url = stream["url"]
-          if (url is string && url.startsWith("http://0.0.0.0:")) {
+          if (url.startsWith("http://0.0.0.0:")) {
             url = url.replaceFirst("0.0.0.0", "127.0.0.1")
           }
           var container = stream["container"]
