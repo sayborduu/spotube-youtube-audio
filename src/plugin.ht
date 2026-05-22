@@ -22,7 +22,7 @@ class YouTubeAudioSourcePlugin {
       )
     )
 
-    audioSource = AudioSourceEndpoint(api, LocalStorage())
+    audioSource = AudioSourceEndpoint(api, LocalStorage)
     auth = AuthEndpoint()
     core = CorePlugin(api)
 
